@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+<body>
+<h3>Desktop Pet Online</h3>
+<div id="pet">🐱</div>
+<input id="msg" placeholder="message"/>
+<button onclick="sendMsg()">Send</button>
+<div id="log"></div>
+<script>
+const ws=new WebSocket('ws://localhost:8080');
+ws.onmessage=e=>{
+ const d=document.getElementById('log');
+ d.innerHTML += '<p>'+e.data+'</p>';
+};
+function sendMsg(){
+ ws.send(JSON.stringify({type:'CHAT_MESSAGE',senderId:'demo',content:document.getElementById('msg').value}));
+}
+</script>
+</body>
+</html>
