@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<body>
+<h3>Desktop Pet Chat</h3>
+<div id="messages"></div>
+<input id="input" placeholder="message">
+<button onclick="send()">Send</button>
+<script>
+const WebSocketClient = require('../network/websocket');
+const socket = new WebSocketClient('ws://localhost:8080');
+
+socket.on('CHAT', msg => {
+  document.getElementById('messages').innerHTML +=
+    '<p>' + msg.userId + ': ' + msg.message + '</p>';
+});
+
+socket.connect();
+
+function send(){
+  const value=document.getElementById('input').value;
+  socket.send('CHAT',{message:value});
+}
+</script>
+</body>
+</html>
