@@ -1,10 +1,22 @@
+const http = require('http');
 const WebSocket = require('ws');
 const UserManager = require('./user/UserManager');
 const RoomManager = require('./room/RoomManager');
 const PetManager = require('./pet/PetManager');
 const config = require('./config');
 
-const server = new WebSocket.Server({ port: config.port });
+const httpServer = http.createServer((request, response) => {
+  if (request.url === '/healthz') {
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify({ ok: true }));
+    return;
+  }
+
+  response.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+  response.end('Desktop Pet Server is running');
+});
+
+const server = new WebSocket.Server({ server: httpServer });
 const DEFAULT_ROOM_ID = config.defaultRoom;
 
 const users = new UserManager();
@@ -154,4 +166,9 @@ server.on('connection', socket => {
   });
 });
 
-console.log(`Desktop Pet Server running on ws://${config.host}:${config.port}`);
+httpServer.listen(config.port, config.bindHost, () => {
+  const bindLabel = config.bindHost || 'default';
+  console.log(
+    `Desktop Pet Server listening on ${bindLabel}:${config.port} (client ws://${config.host}:${config.port})`
+  );
+});
