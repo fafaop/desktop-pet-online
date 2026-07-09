@@ -1,11 +1,25 @@
 {
   "version": "1.0",
-  "type": "CHAT_MESSAGE",
-  "requestId": "uuid",
-  "timestamp": 1710000000,
-  "data": {
-    "senderId": 10001,
-    "receiverId": 10002,
-    "content": "hello"
+  "messageTypes": {
+    "LOGIN": "LOGIN",
+    "HEARTBEAT": "HEARTBEAT",
+    "CHAT_MESSAGE": "CHAT_MESSAGE",
+    "PET_STATE": "PET_STATE",
+    "ONLINE_LIST": "ONLINE_LIST"
+  },
+  "login": {
+    "userId": "string",
+    "nickname": "string"
+  },
+  "chat": {
+    "senderId": "string",
+    "receiverId": "string",
+    "content": "string",
+    "timestamp": "unix_ms"
+  },
+  "petState": {
+    "petId": "string",
+    "action": "idle|walk|happy",
+    "position": {"x":0,"y":0}
   }
 }
