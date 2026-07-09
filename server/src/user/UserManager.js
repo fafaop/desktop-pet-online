@@ -9,11 +9,27 @@ class UserManager {
       id: String(this.sequence++),
       name: name || 'Guest',
       socket,
-      online: true
+      online: true,
+      roomId: null
     };
 
     this.users.set(user.id, user);
     return user;
+  }
+
+  updateName(id, name) {
+    const user = this.users.get(id);
+    if (!user) return null;
+
+    user.name = name || 'Guest';
+    return user;
+  }
+
+  setRoom(id, roomId) {
+    const user = this.users.get(id);
+    if (user) {
+      user.roomId = roomId;
+    }
   }
 
   remove(id) {
@@ -28,7 +44,8 @@ class UserManager {
     return Array.from(this.users.values()).map(user => ({
       id: user.id,
       name: user.name,
-      online: user.online
+      online: user.online,
+      roomId: user.roomId
     }));
   }
 
