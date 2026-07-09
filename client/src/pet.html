@@ -1,4 +1,33 @@
 <!doctype html>
-<html><body style="background:transparent;text-align:center;font-size:80px;">
-🐱<div style="font-size:20px">Desktop Pet Demo</div>
-</body></html>
+<html>
+<body style="background:transparent;text-align:center;font-family:Arial;color:white;">
+  <div style="font-size:90px" id="pet">🐱</div>
+  <h3 id="name">Mimi</h3>
+  <div id="status"></div>
+  <button onclick="feed()">🍖 Feed</button>
+  <button onclick="play()">🎮 Play</button>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+
+    async function refresh() {
+      const state = await ipcRenderer.invoke('pet:getState');
+      document.getElementById('name').innerText = state.name + ' Lv.' + state.level;
+      document.getElementById('status').innerText =
+        'Mood: ' + state.mood + '  Hunger: ' + state.hunger;
+    }
+
+    async function feed() {
+      await ipcRenderer.invoke('pet:feed');
+      refresh();
+    }
+
+    async function play() {
+      await ipcRenderer.invoke('pet:play');
+      refresh();
+    }
+
+    refresh();
+  </script>
+</body>
+</html>
