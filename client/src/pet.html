@@ -4,30 +4,53 @@
   <div style="font-size:90px" id="pet">🐱</div>
   <h3 id="name">Mimi</h3>
   <div id="status"></div>
-  <button onclick="feed()">🍖 Feed</button>
-  <button onclick="play()">🎮 Play</button>
 
-  <script>
-    const { ipcRenderer } = require('electron');
+  <div>
+    <button onclick="feed()">🍖 Feed</button>
+    <button onclick="play()">🎮 Play</button>
+  </div>
 
-    async function refresh() {
-      const state = await ipcRenderer.invoke('pet:getState');
-      document.getElementById('name').innerText = state.name + ' Lv.' + state.level;
-      document.getElementById('status').innerText =
-        'Mood: ' + state.mood + '  Hunger: ' + state.hunger;
-    }
+  <hr>
+  <div id="online">Online: 0</div>
+  <input id="msg" placeholder="message">
+  <button onclick="chat()">Send</button>
+  <div id="chat" style="height:100px;overflow:auto"></div>
 
-    async function feed() {
-      await ipcRenderer.invoke('pet:feed');
-      refresh();
-    }
+<script>
+const { ipcRenderer } = require('electron');
 
-    async function play() {
-      await ipcRenderer.invoke('pet:play');
-      refresh();
-    }
+async function refresh() {
+  const state = await ipcRenderer.invoke('pet:getState');
+  document.getElementById('name').innerText = state.name + ' Lv.' + state.level;
+  document.getElementById('status').innerText =
+    'Mood: ' + state.mood + ' Hunger: ' + state.hunger;
+}
 
-    refresh();
-  </script>
+async function feed() {
+  await ipcRenderer.invoke('pet:feed');
+  refresh();
+}
+
+async function play() {
+  await ipcRenderer.invoke('pet:play');
+  refresh();
+}
+
+function chat() {
+  ipcRenderer.send('chat:send', document.getElementById('msg').value);
+}
+
+ipcRenderer.on('online:update', (_, data) => {
+  document.getElementById('online').innerText =
+    'Online: ' + data.users.length;
+});
+
+ipcRenderer.on('chat:message', (_, data) => {
+  document.getElementById('chat').innerHTML +=
+    '<div>' + data.username + ': ' + data.message + '</div>';
+});
+
+refresh();
+</script>
 </body>
 </html>
