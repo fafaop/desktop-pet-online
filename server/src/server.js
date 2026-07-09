@@ -26,12 +26,7 @@ server.on('connection', socket => {
   const user = users.create(socket);
   const pet = pets.create(user.id);
 
-  send(socket, { type: 'WELCOME', user, pet });
-
-  broadcast({
-    type: 'ONLINE_COUNT',
-    count: users.count()
-  });
+  send(socket, { type: 'WELCOME', user: users.list().find(u => u.id === user.id), pet });
 
   socket.on('message', data => {
     try {
@@ -40,20 +35,19 @@ server.on('connection', socket => {
       switch (msg.type) {
         case 'LOGIN':
           user.name = msg.username || 'Guest';
-          broadcast({
-            type: 'USER_UPDATE',
-            user: {
-              id: user.id,
-              name: user.name
-            }
-          });
+          broadcast({ type: 'USER_UPDATE', user: { id: user.id, name: user.name } });
+          break;
+
+        case 'ROOM_CREATE':
+          rooms.create(msg.roomId || 'default', msg.name);
+          send(socket, { type: 'ROOM_LIST', rooms: rooms.list() });
           break;
 
         case 'ROOM_JOIN':
           rooms.join(msg.roomId || 'default', user);
-          send(socket, {
-            type: 'ROOM_JOINED',
-            roomId: msg.roomId || 'default'
+          rooms.broadcast(msg.roomId || 'default', {
+            type: 'USER_SYNC',
+            users: rooms.list()
           });
           break;
 
@@ -80,19 +74,13 @@ server.on('connection', socket => {
           break;
       }
     } catch (e) {
-      send(socket, {
-        type: 'ERROR',
-        message: 'invalid message'
-      });
+      send(socket, { type: 'ERROR', message: 'invalid message' });
     }
   });
 
   socket.on('close', () => {
     users.remove(user.id);
-    broadcast({
-      type: 'ONLINE_COUNT',
-      count: users.count()
-    });
+    broadcast({ type: 'ONLINE_COUNT', count: users.count() });
   });
 });
 
