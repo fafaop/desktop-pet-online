@@ -1,69 +1,75 @@
-# Desktop Pet Online
+# Desktop Pet Online 🐱
+
+多人在线桌面宠物系统。
 
 ## 项目简介
 
-桌面宠物联机版是一款基于 Windows 平台的多人互动桌面应用。
+Desktop Pet Online 是一个基于 Windows 客户端 + 在线服务端架构的多人互动桌面宠物应用。
 
-用户可以在桌面养成虚拟宠物，并通过网络实现好友聊天、宠物状态同步、互动玩法等功能。
+用户可以在桌面养成虚拟宠物，并通过网络实现实时聊天、多人房间、宠物同步、好友互动等功能。
 
-## 项目目标
+## 核心功能规划
 
-- Windows 桌面宠物体验
-- 用户之间实时通信
-- 支持单聊、群聊
-- 宠物状态同步
-- 可扩展客户端/服务端架构
+- 🐱 桌面宠物引擎
+- 💬 实时聊天系统
+- 🌐 多人房间系统
+- 🔄 宠物状态同步
+- 🎨 宠物皮肤系统
+- 🎁 道具成长系统
+- 👥 好友社交系统
+- 🔄 自动更新系统
 
-## 技术规划
+## 系统架构
 
-### Client
-
-- Windows Desktop Application
-- UI Framework
-- 本地数据管理
-- 网络通信模块
-
-### Server
-
-- 用户管理
-- 身份认证
-- 消息服务
-- 宠物同步服务
-
-### Common
-
-- 通信协议
-- 数据模型
-- 错误码定义
+```
+Windows Client
+      |
+ WebSocket/WSS
+      |
+Game Server
+      |
+Database
+```
 
 ## 项目结构
 
 ```text
 desktop-pet-online/
-├── client/
-├── server/
-├── common/
-├── docs/
-├── assets/
-└── scripts/
+├── client/      # Windows客户端
+├── server/      # 服务端
+├── common/      # 公共协议
+├── docs/        # 设计文档
+├── assets/      # 资源文件
+└── scripts/     # 工具脚本
 ```
 
-## Roadmap
+## 开发路线
 
-### Phase 0
+### Phase 0 - 基础架构
 
-- 项目初始化
-- 系统架构设计
-- 通信协议设计
+- [x] 项目初始化
+- [x] 系统架构设计
+- [x] 通信协议设计
 
-### Phase 1
+### Phase 1 - 核心 Demo
 
-- 桌面宠物原型
-- 用户系统
-- 基础聊天
+- [ ] Windows桌面宠物
+- [ ] 用户系统
+- [ ] WebSocket通信
+- [ ] 基础聊天
 
-### Phase 2
+### Phase 2 - 多人在线
 
-- 多人互动
-- 宠物状态同步
-- 扩展玩法
+- [ ] 房间系统
+- [ ] 多人宠物同步
+- [ ] 群聊
+
+### Phase 3 - 社交化
+
+- [ ] 好友系统
+- [ ] 皮肤系统
+- [ ] 成长系统
+
+## License
+
+MIT
