@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Desktop Pet Online Demo</title></head>
+<body>
+<h2>Desktop Pet Online Web Demo</h2>
+<input id="name" placeholder="name">
+<button onclick="login()">Login</button>
+<br><br>
+<input id="msg" placeholder="message">
+<button onclick="chat()">Send</button>
+<pre id="log"></pre>
+<script>
+let ws;
+function log(v){document.getElementById('log').textContent+=v+'\n';}
+function login(){
+ ws=new WebSocket('ws://localhost:8080/ws');
+ ws.onopen=()=>{
+  ws.send(JSON.stringify({type:'login',data:{user_id:Date.now().toString(),name:document.getElementById('name').value}}));
+  setInterval(()=>ws.send(JSON.stringify({type:'heartbeat'})),10000);
+ };
+ ws.onmessage=e=>log(e.data);
+}
+function chat(){
+ ws.send(JSON.stringify({type:'chat',data:{content:document.getElementById('msg').value}}));
+}
+</script>
+</body>
+</html>
