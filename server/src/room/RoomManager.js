@@ -3,26 +3,42 @@ class RoomManager {
     this.rooms = new Map();
   }
 
-  join(roomId, user) {
+  create(roomId, name) {
     if (!this.rooms.has(roomId)) {
-      this.rooms.set(roomId, new Map());
+      this.rooms.set(roomId, {
+        id: roomId,
+        name: name || roomId,
+        users: new Map()
+      });
     }
+    return this.rooms.get(roomId);
+  }
 
-    this.rooms.get(roomId).set(user.id, user);
+  join(roomId, user) {
+    const room = this.create(roomId, roomId);
+    room.users.set(user.id, user);
   }
 
   leave(roomId, userId) {
     const room = this.rooms.get(roomId);
     if (room) {
-      room.delete(userId);
+      room.users.delete(userId);
     }
+  }
+
+  list() {
+    return Array.from(this.rooms.values()).map(room => ({
+      id: room.id,
+      name: room.name,
+      count: room.users.size
+    }));
   }
 
   broadcast(roomId, message) {
     const room = this.rooms.get(roomId);
     if (!room) return;
 
-    for (const user of room.values()) {
+    for (const user of room.users.values()) {
       if (user.socket.readyState === 1) {
         user.socket.send(JSON.stringify(message));
       }
