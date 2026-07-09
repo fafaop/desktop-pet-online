@@ -11,6 +11,19 @@
   </div>
 
   <hr>
+  <div>
+    <input id="nickname" placeholder="nickname">
+    <button onclick="login()">Login</button>
+  </div>
+  <div id="room-current">Room: lobby</div>
+  <div>
+    <input id="roomId" placeholder="room id">
+    <button onclick="joinRoom()">Join</button>
+    <button onclick="createRoom()">Create</button>
+  </div>
+  <div id="rooms" style="margin-top:8px"></div>
+  <div id="room-users" style="margin-top:8px"></div>
+  <hr>
   <div id="online">Online: 0</div>
   <input id="msg" placeholder="message">
   <button onclick="chat()">Send</button>
@@ -18,12 +31,17 @@
 
 <script>
 const { ipcRenderer } = require('electron');
+let currentRoomId = 'lobby';
 
 async function refresh() {
   const state = await ipcRenderer.invoke('pet:getState');
   document.getElementById('name').innerText = state.name + ' Lv.' + state.level;
   document.getElementById('status').innerText =
     'Mood: ' + state.mood + ' Hunger: ' + state.hunger;
+}
+
+function login() {
+  ipcRenderer.send('user:login', document.getElementById('nickname').value);
 }
 
 async function feed() {
@@ -36,8 +54,18 @@ async function play() {
   refresh();
 }
 
+function joinRoom() {
+  ipcRenderer.send('room:join', document.getElementById('roomId').value);
+}
+
+function createRoom() {
+  ipcRenderer.send('room:create', document.getElementById('roomId').value);
+}
+
 function chat() {
-  ipcRenderer.send('chat:send', document.getElementById('msg').value);
+  const input = document.getElementById('msg');
+  ipcRenderer.send('chat:send', input.value);
+  input.value = '';
 }
 
 ipcRenderer.on('online:update', (_, data) => {
@@ -45,9 +73,31 @@ ipcRenderer.on('online:update', (_, data) => {
     'Online: ' + data.users.length;
 });
 
+ipcRenderer.on('room:joined', (_, data) => {
+  currentRoomId = data.roomId || currentRoomId;
+  document.getElementById('room-current').innerText = 'Room: ' + currentRoomId;
+});
+
+ipcRenderer.on('room:list', (_, data) => {
+  const rooms = data.rooms || [];
+  document.getElementById('rooms').innerHTML = rooms.length
+    ? rooms.map(room => '<div>' + room.name + ' (' + room.count + ')</div>').join('')
+    : '<div>No rooms yet</div>';
+});
+
+ipcRenderer.on('room:users', (_, data) => {
+  const users = data.users || [];
+  document.getElementById('room-users').innerText =
+    'Users: ' + (users.map(user => user.name).join(', ') || 'none');
+});
+
 ipcRenderer.on('chat:message', (_, data) => {
+  if ((data.roomId || currentRoomId) !== currentRoomId) {
+    return;
+  }
+
   document.getElementById('chat').innerHTML +=
-    '<div>' + data.username + ': ' + data.message + '</div>';
+    '<div>[' + currentRoomId + '] ' + data.username + ': ' + data.message + '</div>';
 });
 
 refresh();

@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const PetSocket = require('./network/websocket');
+const config = require('./config');
 
 let petState = {
   name: 'Mimi',
@@ -12,6 +13,7 @@ let petState = {
 
 let socket;
 let win;
+let currentRoomId = 'lobby';
 
 function createWindow() {
   win = new BrowserWindow({
@@ -28,11 +30,16 @@ function createWindow() {
 
   win.loadFile(path.join(__dirname, 'pet.html'));
 
-  socket = new PetSocket('ws://localhost:8080');
+  socket = new PetSocket(config.wsUrl);
 
   socket.on('WELCOME', msg => {
     petState.online = true;
     if (msg.pet) petState = { ...petState, ...msg.pet };
+    currentRoomId = msg.roomId || currentRoomId;
+    win.webContents.send('room:joined', {
+      roomId: currentRoomId,
+      users: []
+    });
   });
 
   socket.on('PET_UPDATE', msg => {
@@ -47,9 +54,30 @@ function createWindow() {
     win.webContents.send('chat:message', msg);
   });
 
+  socket.on('ROOM_LIST', msg => {
+    win.webContents.send('room:list', msg);
+  });
+
+  socket.on('ROOM_USERS', msg => {
+    if (msg.roomId === currentRoomId) {
+      win.webContents.send('room:users', msg);
+    }
+  });
+
+  socket.on('ROOM_JOINED', msg => {
+    currentRoomId = msg.roomId || currentRoomId;
+    win.webContents.send('room:joined', msg);
+    win.webContents.send('room:list', { rooms: msg.rooms || [] });
+    win.webContents.send('room:users', {
+      roomId: currentRoomId,
+      users: msg.users || []
+    });
+  });
+
   socket.connect();
 
   ipcMain.handle('pet:getState', () => petState);
+  ipcMain.handle('room:getCurrent', () => currentRoomId);
 
   ipcMain.on('user:login', (_, name) => {
     socket.send('LOGIN', {
@@ -60,20 +88,41 @@ function createWindow() {
   ipcMain.handle('pet:feed', () => {
     petState.hunger = Math.max(0, petState.hunger - 20);
     petState.mood = Math.min(100, petState.mood + 10);
-    socket.send('PET_UPDATE', { state: petState });
+    socket.send('PET_UPDATE', {
+      roomId: currentRoomId,
+      state: petState
+    });
     return petState;
   });
 
   ipcMain.handle('pet:play', () => {
     petState.mood = Math.min(100, petState.mood + 15);
     petState.hunger = Math.min(100, petState.hunger + 5);
-    socket.send('PET_UPDATE', { state: petState });
+    socket.send('PET_UPDATE', {
+      roomId: currentRoomId,
+      state: petState
+    });
     return petState;
+  });
+
+  ipcMain.on('room:create', (_, roomId) => {
+    const nextRoomId = (roomId || '').trim() || 'lobby';
+    socket.send('ROOM_CREATE', {
+      roomId: nextRoomId,
+      name: nextRoomId
+    });
+  });
+
+  ipcMain.on('room:join', (_, roomId) => {
+    const nextRoomId = (roomId || '').trim() || 'lobby';
+    socket.send('ROOM_JOIN', {
+      roomId: nextRoomId
+    });
   });
 
   ipcMain.on('chat:send', (_, message) => {
     socket.send('CHAT', {
-      roomId: 'default',
+      roomId: currentRoomId,
       message
     });
   });

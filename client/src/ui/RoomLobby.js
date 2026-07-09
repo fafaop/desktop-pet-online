@@ -7,7 +7,7 @@ class RoomLobby {
   join(roomId) {
     this.room.join(roomId);
 
-    this.network.send('room_join', {
+    this.network.send('ROOM_JOIN', {
       roomId
     });
   }
