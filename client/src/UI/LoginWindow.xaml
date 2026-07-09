@@ -1,0 +1,10 @@
+<Window x:Class="DesktopPet.LoginWindow"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+ <Grid>
+  <StackPanel>
+   <TextBox Name="Username" />
+   <PasswordBox Name="Password" />
+   <Button Content="Login" />
+  </StackPanel>
+ </Grid>
+</Window>
