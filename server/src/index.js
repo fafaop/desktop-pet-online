@@ -1,15 +1,28 @@
 import { WebSocketServer } from 'ws';
+import { handleMessage } from './message_handler.js';
 
 const wss = new WebSocketServer({ port: 8080 });
-const clients = new Set();
 
 wss.on('connection', (ws) => {
-  clients.add(ws);
-  ws.send(JSON.stringify({type:'welcome',message:'connected'}));
-  ws.on('message', (msg) => {
-    for (const c of clients) c.send(msg.toString());
+  let userId = null;
+
+  ws.send(JSON.stringify({type:'WELCOME',message:'connected'}));
+
+  ws.on('message', (data) => {
+    try {
+      const msg = JSON.parse(data.toString());
+      if (msg.type === 'LOGIN') {
+        userId = msg.userId;
+      }
+      handleMessage(ws, data.toString());
+    } catch (e) {
+      ws.send(JSON.stringify({type:'ERROR',message:'invalid message'}));
+    }
   });
-  ws.on('close', () => clients.delete(ws));
+
+  ws.on('close', () => {
+    console.log('user disconnected', userId);
+  });
 });
 
-console.log('Desktop Pet demo server: ws://localhost:8080');
+console.log('Desktop Pet Online server running ws://localhost:8080');
