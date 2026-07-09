@@ -4,9 +4,10 @@ class UserManager {
     this.sequence = 1;
   }
 
-  create(socket) {
+  create(socket, name) {
     const user = {
       id: String(this.sequence++),
+      name: name || 'Guest',
       socket,
       online: true
     };
@@ -21,6 +22,18 @@ class UserManager {
 
   get(id) {
     return this.users.get(id);
+  }
+
+  list() {
+    return Array.from(this.users.values()).map(user => ({
+      id: user.id,
+      name: user.name,
+      online: user.online
+    }));
+  }
+
+  count() {
+    return this.users.size;
   }
 }
 
