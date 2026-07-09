@@ -22,11 +22,24 @@ function broadcast(message) {
   });
 }
 
+function syncOnlineUsers() {
+  broadcast({
+    type: 'ONLINE_LIST',
+    users: users.list()
+  });
+}
+
 server.on('connection', socket => {
   const user = users.create(socket);
   const pet = pets.create(user.id);
 
-  send(socket, { type: 'WELCOME', user: users.list().find(u => u.id === user.id), pet });
+  send(socket, {
+    type: 'WELCOME',
+    user: users.list().find(u => u.id === user.id),
+    pet
+  });
+
+  syncOnlineUsers();
 
   socket.on('message', data => {
     try {
@@ -35,7 +48,7 @@ server.on('connection', socket => {
       switch (msg.type) {
         case 'LOGIN':
           user.name = msg.username || 'Guest';
-          broadcast({ type: 'USER_UPDATE', user: { id: user.id, name: user.name } });
+          syncOnlineUsers();
           break;
 
         case 'ROOM_CREATE':
@@ -43,13 +56,15 @@ server.on('connection', socket => {
           send(socket, { type: 'ROOM_LIST', rooms: rooms.list() });
           break;
 
-        case 'ROOM_JOIN':
-          rooms.join(msg.roomId || 'default', user);
-          rooms.broadcast(msg.roomId || 'default', {
-            type: 'USER_SYNC',
-            users: rooms.list()
+        case 'ROOM_JOIN': {
+          const roomId = msg.roomId || 'default';
+          rooms.join(roomId, user);
+          rooms.broadcast(roomId, {
+            type: 'ROOM_USERS',
+            users: rooms.users(roomId)
           });
           break;
+        }
 
         case 'CHAT':
           rooms.broadcast(msg.roomId || 'default', {
@@ -70,8 +85,11 @@ server.on('connection', socket => {
           break;
 
         case 'HEARTBEAT':
-          send(socket, { type: 'HEARTBEAT_ACK' });
+          send(socket, { type: 'HEARTBEAT_ACK', time: Date.now() });
           break;
+
+        default:
+          send(socket, { type: 'ERROR', message: 'unsupported message' });
       }
     } catch (e) {
       send(socket, { type: 'ERROR', message: 'invalid message' });
@@ -79,8 +97,9 @@ server.on('connection', socket => {
   });
 
   socket.on('close', () => {
+    rooms.leaveAll(user.id);
     users.remove(user.id);
-    broadcast({ type: 'ONLINE_COUNT', count: users.count() });
+    syncOnlineUsers();
   });
 });
 
