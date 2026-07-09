@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "type": "CHAT_MESSAGE",
+  "requestId": "uuid",
+  "timestamp": 1710000000,
+  "data": {
+    "senderId": 10001,
+    "receiverId": 10002,
+    "content": "hello"
+  }
+}
