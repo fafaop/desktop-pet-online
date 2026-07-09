@@ -11,11 +11,12 @@ let petState = {
 };
 
 let socket;
+let win;
 
 function createWindow() {
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     width: 360,
-    height: 420,
+    height: 500,
     transparent: true,
     frame: false,
     alwaysOnTop: true,
@@ -28,13 +29,24 @@ function createWindow() {
   win.loadFile(path.join(__dirname, 'pet.html'));
 
   socket = new PetSocket('ws://localhost:8080');
+
   socket.on('WELCOME', msg => {
     petState.online = true;
     if (msg.pet) petState = { ...petState, ...msg.pet };
   });
+
   socket.on('PET_UPDATE', msg => {
     if (msg.pet) petState = { ...petState, ...msg.pet };
   });
+
+  socket.on('ONLINE_LIST', msg => {
+    win.webContents.send('online:update', msg);
+  });
+
+  socket.on('CHAT', msg => {
+    win.webContents.send('chat:message', msg);
+  });
+
   socket.connect();
 
   ipcMain.handle('pet:getState', () => petState);
@@ -51,6 +63,13 @@ function createWindow() {
     petState.hunger = Math.min(100, petState.hunger + 5);
     socket.send('PET_UPDATE', { state: petState });
     return petState;
+  });
+
+  ipcMain.on('chat:send', (_, message) => {
+    socket.send('CHAT', {
+      roomId: 'default',
+      message
+    });
   });
 }
 
