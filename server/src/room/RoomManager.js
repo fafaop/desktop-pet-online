@@ -21,9 +21,29 @@ class RoomManager {
 
   leave(roomId, userId) {
     const room = this.rooms.get(roomId);
-    if (room) {
+    if (!room) return;
+
+    room.users.delete(userId);
+
+    if (room.users.size === 0) {
+      this.rooms.delete(roomId);
+    }
+  }
+
+  leaveAll(userId) {
+    for (const room of this.rooms.values()) {
       room.users.delete(userId);
     }
+  }
+
+  users(roomId) {
+    const room = this.rooms.get(roomId);
+    if (!room) return [];
+
+    return Array.from(room.users.values()).map(user => ({
+      id: user.id,
+      name: user.name
+    }));
   }
 
   list() {
