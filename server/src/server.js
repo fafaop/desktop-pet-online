@@ -1,55 +1,94 @@
 const WebSocket = require('ws');
+const UserManager = require('./user/UserManager');
+const RoomManager = require('./room/RoomManager');
+const PetManager = require('./pet/PetManager');
 
 const server = new WebSocket.Server({ port: 8080 });
-const users = new Map();
 
-function broadcast(message) {
-  for (const client of users.values()) {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(message));
-    }
+const users = new UserManager();
+const rooms = new RoomManager();
+const pets = new PetManager();
+
+function send(socket, message) {
+  if (socket.readyState === WebSocket.OPEN) {
+    socket.send(JSON.stringify(message));
   }
 }
 
-server.on('connection', socket => {
-  const id = Date.now().toString();
-  users.set(id, socket);
+function broadcast(message) {
+  users.list().forEach(item => {
+    const user = users.get(item.id);
+    if (user) {
+      send(user.socket, message);
+    }
+  });
+}
 
-  socket.send(JSON.stringify({
+server.on('connection', socket => {
+  const user = users.create(socket);
+  const pet = pets.create(user.id);
+
+  send(socket, {
     type: 'WELCOME',
-    userId: id
-  }));
+    user,
+    pet
+  });
 
   broadcast({
     type: 'ONLINE_COUNT',
-    count: users.size
+    count: users.count()
   });
 
   socket.on('message', data => {
     try {
       const msg = JSON.parse(data.toString());
 
-      if (msg.type === 'CHAT') {
-        broadcast({
-          type: 'CHAT',
-          userId: id,
-          message: msg.message,
-          time: Date.now()
-        });
+      switch (msg.type) {
+        case 'LOGIN':
+          user.name = msg.username || 'Guest';
+          break;
+
+        case 'ROOM_JOIN':
+          rooms.join(msg.roomId || 'default', user);
+          send(socket, {
+            type: 'ROOM_JOINED',
+            roomId: msg.roomId || 'default'
+          });
+          break;
+
+        case 'CHAT':
+          rooms.broadcast(msg.roomId || 'default', {
+            type: 'CHAT',
+            userId: user.id,
+            message: msg.message,
+            time: Date.now()
+          });
+          break;
+
+        case 'PET_UPDATE':
+          send(socket, {
+            type: 'PET_UPDATE',
+            pet: pets.update(user.id, msg.state || {})
+          });
+          break;
+
+        case 'HEARTBEAT':
+          send(socket, { type: 'HEARTBEAT_ACK' });
+          break;
       }
     } catch (e) {
-      socket.send(JSON.stringify({
+      send(socket, {
         type: 'ERROR',
         message: 'invalid message'
-      }));
+      });
     }
   });
 
   socket.on('close', () => {
-    users.delete(id);
+    users.remove(user.id);
     broadcast({
       type: 'ONLINE_COUNT',
-      count: users.size
+      count: users.count()
     });
   });
 });
