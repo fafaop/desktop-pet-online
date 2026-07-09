@@ -18,9 +18,7 @@ function send(socket, message) {
 function broadcast(message) {
   users.list().forEach(item => {
     const user = users.get(item.id);
-    if (user) {
-      send(user.socket, message);
-    }
+    if (user) send(user.socket, message);
   });
 }
 
@@ -28,11 +26,7 @@ server.on('connection', socket => {
   const user = users.create(socket);
   const pet = pets.create(user.id);
 
-  send(socket, {
-    type: 'WELCOME',
-    user,
-    pet
-  });
+  send(socket, { type: 'WELCOME', user, pet });
 
   broadcast({
     type: 'ONLINE_COUNT',
@@ -46,6 +40,13 @@ server.on('connection', socket => {
       switch (msg.type) {
         case 'LOGIN':
           user.name = msg.username || 'Guest';
+          broadcast({
+            type: 'USER_UPDATE',
+            user: {
+              id: user.id,
+              name: user.name
+            }
+          });
           break;
 
         case 'ROOM_JOIN':
@@ -60,14 +61,16 @@ server.on('connection', socket => {
           rooms.broadcast(msg.roomId || 'default', {
             type: 'CHAT',
             userId: user.id,
-            message: msg.message,
+            username: user.name,
+            message: msg.message || '',
             time: Date.now()
           });
           break;
 
         case 'PET_UPDATE':
-          send(socket, {
+          broadcast({
             type: 'PET_UPDATE',
+            userId: user.id,
             pet: pets.update(user.id, msg.state || {})
           });
           break;
