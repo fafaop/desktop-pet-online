@@ -1,0 +1,16 @@
+{
+  "types": {
+    "JOIN_ROOM": {
+      "roomId":"string",
+      "userId":"string"
+    },
+    "LEAVE_ROOM": {
+      "roomId":"string",
+      "userId":"string"
+    },
+    "ROOM_USERS": {
+      "roomId":"string",
+      "users":[]
+    }
+  }
+}
