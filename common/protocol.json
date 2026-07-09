@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "messages": {
+    "LOGIN": {
+      "fields": ["username"]
+    },
+    "CHAT": {
+      "fields": ["message"]
+    },
+    "PET_UPDATE": {
+      "fields": ["petId", "state"]
+    },
+    "HEARTBEAT": {
+      "fields": []
+    }
+  }
+}
