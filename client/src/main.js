@@ -16,7 +16,7 @@ let win;
 function createWindow() {
   win = new BrowserWindow({
     width: 360,
-    height: 500,
+    height: 520,
     transparent: true,
     frame: false,
     alwaysOnTop: true,
@@ -50,6 +50,12 @@ function createWindow() {
   socket.connect();
 
   ipcMain.handle('pet:getState', () => petState);
+
+  ipcMain.on('user:login', (_, name) => {
+    socket.send('LOGIN', {
+      username: name || 'Guest'
+    });
+  });
 
   ipcMain.handle('pet:feed', () => {
     petState.hunger = Math.max(0, petState.hunger - 20);
