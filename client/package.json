@@ -1,7 +1,58 @@
 {
   "name": "desktop-pet-online-client",
   "version": "0.1.0",
-  "main": "src/main.js",
-  "scripts": {"start": "electron ."},
-  "devDependencies": {"electron": "^37.0.0"}
+  "description": "A multiplayer desktop pet for Windows",
+  "author": "Desktop Pet Online contributors",
+  "license": "MIT",
+  "main": "src/bootstrap.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test",
+    "pack": "npm run icon && electron-builder --dir",
+    "dist": "npm run icon && electron-builder --win nsis portable",
+    "checksums": "node scripts/write-checksums.js",
+    "icon": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/generate-icon.ps1",
+    "smoke:packaged": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/smoke-packaged.ps1"
+  },
+  "devDependencies": {
+    "electron": "^43.1.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "io.github.fafaop.desktoppetonline",
+    "productName": "Desktop Pet Online",
+    "asar": true,
+    "directories": {
+      "output": "dist"
+    },
+    "electronDist": "node_modules/electron/dist",
+    "files": [
+      "src/bootstrap.js",
+      "src/main.js",
+      "src/preload.js",
+      "src/renderer.js",
+      "src/preferences.js",
+      "src/config.js",
+      "src/pet.html",
+      "src/pet-window.html",
+      "src/pet-window.js",
+      "src/pet-window.css",
+      "src/styles.css",
+      "src/Network/websocket.js",
+      "package.json"
+    ],
+    "win": {
+      "icon": "build/icon.png",
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
 }

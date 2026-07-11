@@ -27,7 +27,7 @@ npm start
 Optional environment variables:
 
 ```bash
-PET_SERVER_URL=ws://localhost:8080
+PET_SERVER_URL=ws://localhost:8080/ws
 PET_SERVER_PROTOCOL=ws
 PET_SERVER_HOST=localhost
 PET_SERVER_PORT=8080

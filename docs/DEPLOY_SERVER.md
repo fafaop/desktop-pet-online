@@ -4,7 +4,7 @@
 
 The current server is a Node.js WebSocket service.
 
-- WebSocket: `ws://host:port`
+- WebSocket: `ws://host:port/ws`
 - Health check: `http://host:port/healthz`
 
 ## Environment Variables
@@ -77,7 +77,7 @@ Expected response:
 For local Electron startup:
 
 ```bash
-PET_SERVER_URL=ws://your-domain-or-ip:8080 npm start
+PET_SERVER_URL=ws://your-domain-or-ip:8080/ws npm start
 ```
 
 If you later place Nginx in front of the service and terminate TLS there, the client URL can become:
@@ -90,4 +90,4 @@ PET_SERVER_URL=wss://your-domain/ws npm start
 
 - Open the server port in the cloud firewall or security group.
 - Use Nginx or another reverse proxy if you want TLS and a stable `wss://` endpoint.
-- The current WebSocket server accepts upgrade requests on any path, so `/ws` can be proxied to the same upstream port.
+- The WebSocket server accepts upgrade requests only on `/ws`.

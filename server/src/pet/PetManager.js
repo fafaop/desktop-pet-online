@@ -9,7 +9,9 @@ class PetManager {
       owner: userId,
       level: 1,
       mood: 80,
-      hunger: 20
+      hunger: 20,
+      action: 'idle',
+      position: { x: 0, y: 0 }
     };
 
     this.pets.set(userId, pet);
@@ -26,6 +28,10 @@ class PetManager {
 
   get(userId) {
     return this.pets.get(userId);
+  }
+
+  remove(userId) {
+    this.pets.delete(userId);
   }
 }
 

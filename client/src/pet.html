@@ -1,106 +1,89 @@
 <!doctype html>
-<html>
-<body style="background:transparent;text-align:center;font-family:Arial;color:white;">
-  <div style="font-size:90px" id="pet">🐱</div>
-  <h3 id="name">Mimi</h3>
-  <div id="status"></div>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; img-src 'self' data:">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Desktop Pet Online</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="titlebar">
+      <span>Desktop Pet Online</span>
+      <div class="window-actions">
+        <button id="minimize" aria-label="Minimize">−</button>
+        <button id="close" aria-label="Close">×</button>
+      </div>
+    </header>
 
-  <div>
-    <button onclick="feed()">🍖 Feed</button>
-    <button onclick="play()">🎮 Play</button>
-  </div>
+    <section class="hero">
+      <div id="connection" class="connection offline">Offline</div>
+      <div class="pet-preview" aria-label="beige bear pet">
+        <span class="preview-ear left"></span><span class="preview-ear right"></span>
+        <span class="preview-face"><i class="preview-eye left"></i><i class="preview-eye right"></i><i class="preview-nose"></i></span>
+        <span class="preview-body"></span>
+      </div>
+      <h1 id="pet-name">Mimi</h1>
+      <p id="pet-status">Mood 80 · Hunger 20</p>
+      <div class="button-row">
+        <button id="feed" class="primary">🍖 Feed</button>
+        <button id="play" class="primary">🎮 Play</button>
+        <button id="toggle-movement">Pause roaming</button>
+      </div>
+    </section>
 
-  <hr>
-  <div>
-    <input id="nickname" placeholder="nickname">
-    <button onclick="login()">Login</button>
-  </div>
-  <div id="room-current">Room: lobby</div>
-  <div>
-    <input id="roomId" placeholder="room id">
-    <button onclick="joinRoom()">Join</button>
-    <button onclick="createRoom()">Create</button>
-  </div>
-  <div id="rooms" style="margin-top:8px"></div>
-  <div id="room-users" style="margin-top:8px"></div>
-  <hr>
-  <div id="online">Online: 0</div>
-  <input id="msg" placeholder="message">
-  <button onclick="chat()">Send</button>
-  <div id="chat" style="height:100px;overflow:auto"></div>
+    <section class="panel">
+      <h2>Profile</h2>
+      <div class="input-row">
+        <input id="nickname" maxlength="24" placeholder="Nickname" autocomplete="off">
+        <button id="login">Login</button>
+      </div>
+    </section>
 
-<script>
-const { ipcRenderer } = require('electron');
-let currentRoomId = 'lobby';
+    <details class="panel settings-panel">
+      <summary>Connection settings</summary>
+      <label for="server-url">WebSocket server</label>
+      <input id="server-url" maxlength="2048" placeholder="wss://pet.example.com/ws" spellcheck="false">
+      <p class="hint">Use WSS for public servers. Saving reconnects immediately.</p>
+      <button id="save-settings">Save and reconnect</button>
+    </details>
 
-async function refresh() {
-  const state = await ipcRenderer.invoke('pet:getState');
-  document.getElementById('name').innerText = state.name + ' Lv.' + state.level;
-  document.getElementById('status').innerText =
-    'Mood: ' + state.mood + ' Hunger: ' + state.hunger;
-}
+    <section class="panel">
+      <div class="section-heading">
+        <h2 id="room-current">Room · lobby</h2>
+        <span id="online">0 online</span>
+      </div>
+      <div class="input-row">
+        <input id="room-id" maxlength="32" placeholder="Room ID" autocomplete="off">
+        <button id="join-room">Join</button>
+        <button id="create-room">Create</button>
+      </div>
+      <div class="subsection">
+        <strong>Rooms</strong>
+        <div id="rooms" class="chips"><span class="muted">No rooms yet</span></div>
+      </div>
+      <div class="subsection">
+        <strong>Members</strong>
+        <div id="room-users" class="muted">None</div>
+      </div>
+      <div class="subsection">
+        <strong>Other pets</strong>
+        <div id="remote-pets" class="muted">None</div>
+      </div>
+    </section>
 
-function login() {
-  ipcRenderer.send('user:login', document.getElementById('nickname').value);
-}
+    <section class="panel chat-panel">
+      <h2>Room chat</h2>
+      <div id="chat" class="chat-log" aria-live="polite"></div>
+      <div class="input-row">
+        <input id="message" maxlength="500" placeholder="Write a message" autocomplete="off">
+        <button id="send-chat" class="primary">Send</button>
+      </div>
+    </section>
 
-async function feed() {
-  await ipcRenderer.invoke('pet:feed');
-  refresh();
-}
-
-async function play() {
-  await ipcRenderer.invoke('pet:play');
-  refresh();
-}
-
-function joinRoom() {
-  ipcRenderer.send('room:join', document.getElementById('roomId').value);
-}
-
-function createRoom() {
-  ipcRenderer.send('room:create', document.getElementById('roomId').value);
-}
-
-function chat() {
-  const input = document.getElementById('msg');
-  ipcRenderer.send('chat:send', input.value);
-  input.value = '';
-}
-
-ipcRenderer.on('online:update', (_, data) => {
-  document.getElementById('online').innerText =
-    'Online: ' + data.users.length;
-});
-
-ipcRenderer.on('room:joined', (_, data) => {
-  currentRoomId = data.roomId || currentRoomId;
-  document.getElementById('room-current').innerText = 'Room: ' + currentRoomId;
-});
-
-ipcRenderer.on('room:list', (_, data) => {
-  const rooms = data.rooms || [];
-  document.getElementById('rooms').innerHTML = rooms.length
-    ? rooms.map(room => '<div>' + room.name + ' (' + room.count + ')</div>').join('')
-    : '<div>No rooms yet</div>';
-});
-
-ipcRenderer.on('room:users', (_, data) => {
-  const users = data.users || [];
-  document.getElementById('room-users').innerText =
-    'Users: ' + (users.map(user => user.name).join(', ') || 'none');
-});
-
-ipcRenderer.on('chat:message', (_, data) => {
-  if ((data.roomId || currentRoomId) !== currentRoomId) {
-    return;
-  }
-
-  document.getElementById('chat').innerHTML +=
-    '<div>[' + currentRoomId + '] ' + data.username + ': ' + data.message + '</div>';
-});
-
-refresh();
-</script>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </main>
+  <script src="renderer.js"></script>
 </body>
 </html>

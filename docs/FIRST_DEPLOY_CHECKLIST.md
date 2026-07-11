@@ -45,7 +45,7 @@ PET_SERVER_URL=wss://your-domain/ws npm start
 For direct, no-proxy testing:
 
 ```bash
-PET_SERVER_URL=ws://your-server-ip:8080 npm start
+PET_SERVER_URL=ws://your-server-ip:8080/ws npm start
 ```
 
 ## Smoke Test

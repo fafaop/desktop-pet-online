@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; img-src 'self' data:">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mimi</title>
+  <link rel="stylesheet" href="pet-window.css">
+</head>
+<body>
+  <div id="pet-stage" class="pet-stage" aria-label="Mimi the desktop pet">
+    <div id="speech" class="speech" role="status" aria-live="polite"></div>
+    <div id="interaction-menu" class="interaction-menu" aria-label="Pet interactions">
+      <button data-action="feed" title="Feed">🍪<span>Feed</span></button>
+      <button data-action="play" title="Play">🧶<span>Play</span></button>
+      <button data-action="pet" title="Head pat">🤍<span>Pet</span></button>
+      <button data-action="rest" title="Rest">🌙<span>Rest</span></button>
+      <button id="toggle-movement" title="Pause movement">⏸<span>Pause</span></button>
+      <button id="open-panel" title="Open control panel">⚙<span>Panel</span></button>
+      <button id="quit-app" title="Quit desktop pet">⏻<span>Quit</span></button>
+    </div>
+    <div id="pet" class="pet" tabindex="0" role="button" aria-label="Click Mimi for interaction options">
+      <svg class="pet-art" viewBox="0 0 220 210" role="img" aria-label="A round beige bear-like pet">
+        <ellipse class="shadow" cx="110" cy="190" rx="72" ry="12" />
+        <g class="pet-body">
+          <circle class="ear outer" cx="62" cy="54" r="25" />
+          <circle class="ear inner" cx="62" cy="54" r="14" />
+          <circle class="ear outer" cx="158" cy="54" r="25" />
+          <circle class="ear inner" cx="158" cy="54" r="14" />
+          <path class="body" d="M63 132 C53 151 54 181 72 190 C88 198 132 198 148 190 C166 181 167 151 157 132 Z" />
+          <ellipse class="foot" cx="68" cy="176" rx="25" ry="29" />
+          <ellipse class="pad" cx="59" cy="176" rx="8" ry="13" />
+          <ellipse class="foot" cx="152" cy="176" rx="25" ry="29" />
+          <ellipse class="pad" cx="161" cy="176" rx="8" ry="13" />
+          <path class="belly-line" d="M88 153 C87 173 90 187 99 193 M132 153 C133 173 130 187 121 193" />
+          <path class="head" d="M47 72 C47 36 70 21 110 21 C150 21 173 36 173 72 C173 110 151 130 110 130 C69 130 47 110 47 72 Z" />
+          <circle class="eye" cx="82" cy="75" r="4" />
+          <circle class="eye" cx="138" cy="75" r="4" />
+          <ellipse class="muzzle" cx="110" cy="93" rx="28" ry="20" />
+          <path class="nose" d="M102 87 Q110 81 118 87 Q117 96 110 97 Q103 96 102 87 Z" />
+          <path class="mouth" d="M110 97 L110 105 M110 104 Q101 111 95 104 M110 104 Q119 111 125 104" />
+          <path class="brow" d="M74 65 Q82 60 90 65 M130 65 Q138 60 146 65" />
+          <path class="blush" d="M65 91 Q74 96 82 91 M138 91 Q146 96 155 91" />
+        </g>
+        <g class="sleep-marks"><text x="163" y="40">z</text><text x="179" y="24">Z</text></g>
+      </svg>
+      <div id="heart" class="heart" aria-hidden="true">♥</div>
+    </div>
+    <div id="pet-caption" class="pet-caption">Mimi · feeling cozy</div>
+  </div>
+  <script src="pet-window.js"></script>
+</body>
+</html>

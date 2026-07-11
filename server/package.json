@@ -1,10 +1,16 @@
 {
   "name": "desktop-pet-online-server",
   "version": "0.1.0",
+  "description": "WebSocket server for Desktop Pet Online",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "test": "node --test"
   },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT",
   "dependencies": {
     "ws": "^8.18.0"
   }
